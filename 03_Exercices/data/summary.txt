@@ -1,0 +1,4 @@
+Average age: 20.5
+Oldest : David
+Youngest : Noah
+Number of data: 14
