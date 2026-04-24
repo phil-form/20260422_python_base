@@ -1,0 +1,49 @@
+name: notebooks-to-pdf.yml
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-pdfs:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install nbconvert notebook nbformat
+          pip install pyppeteer
+
+      - name: Install LaTeX (required for PDF export)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y texlive-xetex texlive-fonts-recommended texlive-plain-generic
+
+      - name: Convert all notebooks to PDF
+        run: |
+          mkdir -p pdfs
+          for file in $(find . -name "*.ipynb"); do
+            echo "Converting $file"
+            jupyter nbconvert "$file" \
+              --to pdf \
+              --output-dir pdfs
+          done
+
+      - name: Commit PDFs back to repo
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+          git add pdfs/*.pdf || true
+
+          git commit -m "Update generated PDFs" || echo "No changes to commit"
+          git push || echo "No changes to push"
