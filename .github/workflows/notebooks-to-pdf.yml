@@ -3,7 +3,7 @@ name: Convert notebooks to PDF (HTML pipeline)
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   build-pdfs:
